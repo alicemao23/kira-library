@@ -1,14 +1,20 @@
 const express = require("express");
 const path = require("path");
 const app = express();
+const bodyParser = require("body-parser");
+
 const get = require("lodash.get");
 const BOOK_DATA = require("./data.json");
-let db = BOOK_DATA;
 
-// Must list all books in inventory (by default)
-// Allow searching of books by title
-// Allow reservation of books
-// View books currently reserved
+let db = BOOK_DATA.map((book) => {
+  book.reservedList = [];
+  return book;
+});
+
+//TODO: View books currently reserved
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "../", "build")));
 
@@ -18,17 +24,15 @@ app.get("/", (req, res) => {
 
 function validateQuery(req, res, next) {
   try {
-    req.query.page = req.query.page ? validateAndParseInt(req.query.page) : 1;
-    req.query.limit = req.query.limit
-      ? validateAndParseInt(req.query.limit)
-      : 3;
+    req.query.page = req.query.page ? validateParseInt(req.query.page) : 1;
+    req.query.limit = req.query.limit ? validateParseInt(req.query.limit) : 3;
     next();
   } catch (err) {
     res.status(403).send({ message: err });
   }
 }
 
-function validateAndParseInt(value) {
+function validateParseInt(value) {
   if (!parseInt(value)) throw "Query params value invalid";
 
   return parseInt(value);
@@ -53,6 +57,45 @@ app.get("/books", validateQuery, (req, res) => {
     console.error(err);
   }
 });
+
+app.put("/books", validateRequest, (req, res) => {
+  const bookID = req.body.bookId;
+  const book = db.find((book) => book.id === bookID);
+  const userName = req.body.userName;
+  const hasAvailability = book.quantity >= 1;
+
+  if (!book || !hasAvailability) {
+    res.status(404).send({
+      message: "your requested reservation could not be made, please try again",
+    });
+  }
+  db = db.map((book) => {
+    if (book.id === parseInt(bookID)) {
+      book.quantity = book.quantity - 1;
+      book.reservedList.push(userName);
+    }
+    return book;
+  });
+  return res.send("success");
+});
+
+function validateRequest(req, res, next) {
+  try {
+    const body = hasRequiredBody(req.body);
+    req.body.bookId = validateParseInt(body.bookId);
+    next();
+  } catch (err) {
+    res.status(403).send({ message: err });
+  }
+}
+
+function hasRequiredBody(body) {
+  if (body.userName === undefined)
+    throw "Missing required request params userName";
+  else if (body.bookId === undefined)
+    throw "missing required request params bodyId";
+  return body;
+}
 
 function paginateResponse(data, page, limit) {
   const maxLimit = 3;
