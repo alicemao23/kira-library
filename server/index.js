@@ -28,7 +28,7 @@ function validateQuery(req, res, next) {
     req.query.limit = req.query.limit ? validateParseInt(req.query.limit) : 3;
     next();
   } catch (err) {
-    res.status(403).send({ message: err });
+    res.status(400).send({ message: err });
   }
 }
 
@@ -67,7 +67,7 @@ app.put("/books", validateRequest, (req, res) => {
   const hasAvailability = book.quantity >= 1;
 
   if (!book || !hasAvailability) {
-    res.status(404).send({
+    res.status(400).send({
       message: "your requested reservation could not be made, please try again",
     });
   }
@@ -94,7 +94,7 @@ function validateRequest(req, res, next) {
     req.body.bookId = validateParseInt(body.bookId);
     next();
   } catch (err) {
-    res.status(403).send({ message: err });
+    res.status(400).send({ message: err });
   }
 }
 
