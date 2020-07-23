@@ -45,7 +45,9 @@ app.get("/books", validateQuery, (req, res) => {
     const page = get(req, "query.page", 1);
     const titleQuery = get(req, "query.title", false);
     const books = titleQuery ? processQueryByTitle(req.query.title) : data;
-    const result = paginateResponse(books, page, limit);
+    const result = paginateResponse(books, page, limit).map(
+      formatBookStructure
+    );
     const _links = constructLinks(req, limit, page);
 
     const response = {
@@ -77,6 +79,13 @@ app.put("/books", validateRequest, (req, res) => {
     return book;
   });
   return res.send("success");
+});
+
+app.get("/books/:userName", (req, res) => {
+  const userName = req.params.userName;
+  const result = db.filter((book) => book.reservedList.includes(userName));
+  const formatResults = result.map(formatBookStructure);
+  return res.send(formatResults);
 });
 
 function validateRequest(req, res, next) {
@@ -140,6 +149,11 @@ function constructLinks(request, limit, page) {
 function processQueryByTitle(titleQuery) {
   const matchedBooks = searchBookByTitle(titleQuery);
   return matchedBooks;
+}
+
+function formatBookStructure(book) {
+  const { title, id, author, quantity } = book;
+  return { id, title, author, quantity };
 }
 
 function searchBookByTitle(searchVal) {
