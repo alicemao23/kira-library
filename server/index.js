@@ -39,7 +39,9 @@ app.get("/books", validateQuery, (req, res) => {
     const data = db;
     const limit = get(req, "query.limit", 3);
     const page = get(req, "query.page", 1);
-    const result = paginateResponse(data, page, limit);
+    const titleQuery = get(req, "query.title", false);
+    const books = titleQuery ? processQueryByTitle(req.query.title) : data;
+    const result = paginateResponse(books, page, limit);
     const _links = constructLinks(req, limit, page);
 
     const response = {
@@ -53,8 +55,16 @@ app.get("/books", validateQuery, (req, res) => {
 });
 
 function paginateResponse(data, page, limit) {
-  const start = (page - 1) * limit;
-  const end = start + limit;
+  const maxLimit = 3;
+  let start;
+  let end;
+  if (limit > maxLimit) {
+    start = (page - 1) * maxLimit;
+    end = start + maxLimit;
+  } else {
+    start = (page - 1) * limit;
+    end = start + limit;
+  }
   const result = data.slice(start, end);
   return result;
 }
@@ -84,4 +94,16 @@ function constructLinks(request, limit, page) {
   return _links;
 }
 
+function processQueryByTitle(titleQuery) {
+  const matchedBooks = searchBookByTitle(titleQuery);
+  return matchedBooks;
+}
+
+function searchBookByTitle(searchVal) {
+  // search feature for title should be case-insensitive
+  const searchQuery = searchVal.toLowerCase();
+  return BOOK_DATA.filter((book) =>
+    book.title.toLowerCase().includes(searchQuery)
+  );
+}
 app.listen(8080, console.log("Server running on port 8080"));
