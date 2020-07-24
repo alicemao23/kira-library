@@ -1,6 +1,6 @@
 const get = require('lodash.get')
 const db = require('./db')
-
+const isNil = require('lodash.isnil')
 function validateParseInt(value) {
   if (!parseInt(value)) throw 'Query params value invalid'
 
@@ -8,10 +8,8 @@ function validateParseInt(value) {
 }
 
 function hasRequiredBody(body) {
-  if (body.userName === undefined)
-    throw 'Missing required request params userName'
-  else if (body.bookId === undefined)
-    throw 'missing required request params bodyId'
+  if (isNil(body.userName)) throw 'Missing required request params userName'
+  else if (isNil(body.bookId)) throw 'missing required request params bodyId'
   return body
 }
 
@@ -45,12 +43,10 @@ function constructLinks(request, limit, page, pageTotal) {
   const next =
     page === pageTotal
       ? {}
-      : `${baseUrl}${pathname}?limit=${limit}&page=${nextPage}`
+      : {next: `${pathname}?limit=${limit}&page=${nextPage}`}
 
   const prev =
-    page === 1
-      ? {}
-      : {prev: `${baseUrl}${pathname}?limit=${limit}&page=${prevPage}`}
+    page === 1 ? {} : {prev: `${pathname}?limit=${limit}&page=${prevPage}`}
 
   const _links = {
     baseUrl,

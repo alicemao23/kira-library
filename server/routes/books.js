@@ -11,7 +11,8 @@ const {
 } = require('../helpers.js')
 const {validateQuery, validateRequest} = require('../middleware/validators')
 
-const db = require('../db')
+let db = require('../db')
+
 router.get('/', validateQuery, (req, res) => {
   try {
     const data = db

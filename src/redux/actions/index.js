@@ -1,8 +1,15 @@
-import {GET_BOOKS, RESERVE_BOOK, SAVE_USER_NAME, SEARCH_BOOKS} from './types'
+import {
+  GET_BOOKS,
+  RESERVE_BOOK,
+  SAVE_USER_NAME,
+  SEARCH_BOOKS,
+  GET_RESERVED_BOOKS,
+} from './types'
 
-const getBooks = () => {
+const getBooks = (url) => {
   return {
     type: GET_BOOKS,
+    url,
   }
 }
 
@@ -14,9 +21,10 @@ const reserveBook = ({userName, bookId}) => {
   }
 }
 
-const saveUserName = () => {
+const saveUserName = (userName) => {
   return {
     type: SAVE_USER_NAME,
+    userName,
   }
 }
 const searchBookByTitle = (queryString) => {
@@ -25,4 +33,17 @@ const searchBookByTitle = (queryString) => {
     query: queryString,
   }
 }
-export {getBooks, reserveBook, saveUserName, searchBookByTitle}
+
+const getReservedBooks = (userName) => {
+  return {
+    type: GET_RESERVED_BOOKS,
+    userName,
+  }
+}
+export {
+  getBooks,
+  reserveBook,
+  saveUserName,
+  searchBookByTitle,
+  getReservedBooks,
+}

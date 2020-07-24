@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import {connect} from 'react-redux'
 
 import {makeStyles} from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
@@ -10,13 +11,14 @@ import Slide from '@material-ui/core/Slide'
 import Typography from '@material-ui/core/Typography'
 import AccountCircleIcon from '@material-ui/icons/AccountCircle'
 
+import {saveUserName} from './redux/actions'
 import Home from './components/Home'
 import './App.css'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   title: {
-    marginLeft: theme.spacing(2),
-    flex: 1,
+    marginBottom: '1.5rem',
+    textAlign: 'center',
   },
   card: {
     width: 500,
@@ -33,14 +35,14 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     justifyContent: 'space-between',
   },
-}))
+})
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />
 })
 
-function App() {
-  const [userName, setUserName] = useState('alicemao23')
+function App({dispatchSaveUserName = () => {}}) {
+  const [userName, setUserName] = useState('')
   const [open, setOpen] = useState(!userName)
   const classes = useStyles()
 
@@ -49,6 +51,7 @@ function App() {
   }
   const handleSubmit = (e) => {
     e.preventDefault()
+    dispatchSaveUserName(userName)
     !!userName.length && setOpen(false)
   }
   return (
@@ -60,11 +63,8 @@ function App() {
         onClose={handleClose}
         TransitionComponent={Transition}>
         <div className={classes.card}>
-          <Typography variant="h3" className={classes.title}>
-            WELCOME TO KIRA LIBRARY
-          </Typography>
-          <Typography variant="h6" className={classes.title}>
-            Please enter your username
+          <Typography variant="h4" className={classes.title}>
+            Welcome to KIRA Library
           </Typography>
           <Paper
             component="form"
@@ -75,6 +75,7 @@ function App() {
               <AccountCircleIcon className={classes.icon} />
             </IconButton>
             <InputBase
+              placeholder="Please enter your username"
               className={classes.input}
               onChange={(e) => setUserName(e.target.value)}
               inputProps={{'aria-label': 'enter user name'}}
@@ -93,4 +94,12 @@ function App() {
   )
 }
 
-export default App
+const mapDispatchToProps = (dispatch) => {
+  return {
+    dispatchSaveUserName: (userName) => {
+      dispatch(saveUserName(userName))
+    },
+  }
+}
+const ConnectedApp = connect(null, mapDispatchToProps)(App)
+export default ConnectedApp
