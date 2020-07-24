@@ -7,6 +7,7 @@ const {
   constructLinks,
   processQueryByTitle,
   formatBookStructure,
+  getTotalPage,
 } = require('../helpers.js')
 const {validateQuery, validateRequest} = require('../middleware/validators')
 
@@ -19,11 +20,12 @@ router.get('/', validateQuery, (req, res) => {
     const titleQuery = get(req, 'query.title', false)
     const books = titleQuery ? processQueryByTitle(req.query.title) : data
     const result = paginateResponse(books, page, limit).map(formatBookStructure)
-    const _links = constructLinks(req, limit, page)
-
+    const pageTotal = getTotalPage(books, limit)
+    const _links = constructLinks(req, limit, page, pageTotal)
     const response = {
       result,
       _links,
+      pageTotal,
     }
     res.send(response)
   } catch (err) {

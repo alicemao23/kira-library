@@ -30,16 +30,23 @@ function paginateResponse(data, page, limit) {
   return result
 }
 
-function constructLinks(request, limit, page) {
+function getTotalPage(data, limit) {
+  const pageTotal = Math.ceil(data.length / limit)
+  return pageTotal
+}
+
+function constructLinks(request, limit, page, pageTotal) {
   const baseUrl = 'http://localhost:8080'
   const pathname = get(request, '_parsedOriginalUrl.pathname')
   const path = get(request, '_parsedOriginalUrl.path')
   const nextPage = page + 1
   const prevPage = page - 1
 
-  const next = {
-    next: `${baseUrl}${pathname}?limit=${limit}&page=${nextPage}`,
-  }
+  const next =
+    page === pageTotal
+      ? {}
+      : `${baseUrl}${pathname}?limit=${limit}&page=${nextPage}`
+
   const prev =
     page === 1
       ? {}
@@ -79,4 +86,5 @@ module.exports = {
   processQueryByTitle,
   formatBookStructure,
   searchBookByTitle,
+  getTotalPage,
 }
