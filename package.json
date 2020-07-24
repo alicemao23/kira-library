@@ -19,10 +19,10 @@
     "redux": "^4.0.5",
     "redux-saga": "^1.1.3"
   },
-  "proxy": "localhost:8080",
+  "proxy": "http:localhost:8080",
   "scripts": {
-    "dev": "npm run build && npx nodemon server",
-    "start": "react-scripts start && npm run server",
+    "start": "npm run build && node server",
+    "dev": "react-scripts start && npx nodemon server",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
